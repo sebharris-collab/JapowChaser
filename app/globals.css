@@ -4,6 +4,40 @@
 
 @layer base {
   :root {
+    /* Light Mode Variables */
+    --background: 210 40% 98%;
+    --foreground: 222 47% 11%;
+
+    --card: 0 0% 100%;
+    --card-foreground: 222 47% 11%;
+
+    --popover: 0 0% 100%;
+    --popover-foreground: 222 47% 11%;
+
+    --primary: 226 100% 60%;
+    /* Electric Indigo */
+    --primary-foreground: 210 40% 98%;
+
+    --secondary: 210 40% 96%;
+    --secondary-foreground: 222 47% 11%;
+
+    --muted: 210 40% 96%;
+    --muted-foreground: 215 16% 47%;
+
+    --accent: 210 40% 96%;
+    --accent-foreground: 222 47% 11%;
+
+    --destructive: 0 84% 60%;
+    --destructive-foreground: 210 40% 98%;
+
+    --border: 214 32% 91%;
+    --input: 214 32% 91%;
+    --ring: 226 100% 60%;
+
+    --radius: 0.75rem;
+  }
+
+  .dark {
     /* Deep Slate (Slate-950) Background */
     --background: 222 47% 11%;
     /* High contrast White (Slate-50) Text */
@@ -38,8 +72,6 @@
     --border: 215 25% 27%;
     --input: 215 25% 27%;
     --ring: 226 100% 65%;
-
-    --radius: 0.75rem;
   }
 }
 
@@ -49,6 +81,6 @@
   }
 
   body {
-    @apply bg-slate-950 text-slate-50 antialiased selection:bg-indigo-500/30;
+    @apply bg-background text-foreground antialiased selection:bg-primary/20;
   }
 }
