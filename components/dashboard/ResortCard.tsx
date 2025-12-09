@@ -41,13 +41,13 @@ export function ResortCard({ name, region, data, loading }: ResortCardProps) {
     return (
         <Card
             className={cn(
-                "group relative overflow-hidden border border-slate-800 bg-slate-900/60 backdrop-blur-md transition-all duration-300 ease-out",
-                "hover:scale-[1.02] hover:border-slate-600 hover:shadow-2xl hover:shadow-indigo-500/10 cursor-pointer"
+                "group relative overflow-hidden border border-slate-700/50 bg-slate-900/80 backdrop-blur-xl transition-all duration-300 ease-out",
+                "hover:scale-[1.02] hover:border-indigo-500/50 hover:shadow-2xl hover:shadow-indigo-500/20 cursor-pointer"
             )}
             onClick={() => setIsExpanded(!isExpanded)}
         >
-            {/* Subtle Gradient Glow at top */}
-            <div className="absolute inset-x-0 top-0 h-px bg-gradient-to-r from-transparent via-slate-700 to-transparent opacity-50 group-hover:via-indigo-500/50 transition-all duration-500" />
+            {/* Vivid Gradient Glow at top */}
+            <div className="absolute inset-x-0 top-0 h-1 bg-gradient-to-r from-transparent via-indigo-500 to-transparent opacity-0 group-hover:opacity-100 transition-opacity duration-300" />
 
             <CardHeader className="pb-2 pt-6 px-6">
                 <div className="flex justify-between items-start">

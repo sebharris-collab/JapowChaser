@@ -49,11 +49,11 @@ export function ForecastMatrix({ forecasts, loading }: ForecastMatrixProps) {
     };
 
     return (
-        <div className="overflow-x-auto rounded-xl border border-slate-800 bg-slate-950/40 backdrop-blur-sm shadow-2xl">
+        <div className="overflow-x-auto rounded-xl border border-slate-700/50 bg-slate-900/60 backdrop-blur-sm shadow-2xl">
             <table className="w-full text-sm text-left border-collapse">
-                <thead className="bg-slate-900/80 text-[10px] uppercase text-slate-400 font-semibold tracking-wider backdrop-blur-md">
+                <thead className="bg-slate-900 text-[10px] uppercase text-slate-400 font-semibold tracking-wider backdrop-blur-md border-b border-indigo-500/20">
                     <tr>
-                        <th className="px-6 py-4 min-w-[180px] sticky left-0 bg-slate-950/95 z-20 border-b border-r border-slate-800">
+                        <th className="px-6 py-4 min-w-[180px] sticky left-0 bg-slate-900 z-20 border-r border-slate-800">
                             Resort
                         </th>
                         <th className="px-4 py-4 text-center border-b border-r border-slate-800 w-[80px] bg-slate-900/50">

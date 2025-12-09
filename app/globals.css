@@ -9,40 +9,37 @@
     /* High contrast White (Slate-50) Text */
     --foreground: 210 40% 98%;
 
-    /* Glassy Surface (Slate-900 with opacity) */
-    --card: 222 47% 11%;
-    /* Base color, opacity handled in component utility */
+    /* Glassy Surface - Slightly Lighter (Slate-900) */
+    --card: 222 47% 13%;
     --card-foreground: 210 40% 98%;
 
-    --popover: 222 47% 11%;
+    --popover: 222 47% 13%;
     --popover-foreground: 210 40% 98%;
 
-    /* Electric Blue / Indigo Accent */
-    --primary: 226 70% 55%;
-    /* Indigo-500 for better visibility, or 400 for text */
+    /* Electric Blue / Indigo Accent - More Vibrant */
+    --primary: 226 100% 65%;
+    /* Brighter Indigo */
     --primary-foreground: 210 40% 98%;
 
-    --secondary: 217 33% 17%;
-    /* Slate-800 */
+    --secondary: 215 25% 20%;
+    /* Distinct Slate-800 */
     --secondary-foreground: 210 40% 98%;
 
-    --muted: 217 33% 17%;
+    --muted: 215 25% 20%;
     --muted-foreground: 215 20% 65%;
-    /* Slate-400 */
 
-    --accent: 217 33% 17%;
+    --accent: 215 25% 20%;
     --accent-foreground: 210 40% 98%;
 
-    --destructive: 0 62% 30%;
+    --destructive: 0 84% 60%;
     --destructive-foreground: 210 40% 98%;
 
-    /* Subtle Borders (Slate-800) */
-    --border: 217 33% 17%;
-    --input: 217 33% 17%;
-    --ring: 224 76% 48%;
+    /* Lighter Borders for Contrast (Slate-700) */
+    --border: 215 25% 27%;
+    --input: 215 25% 27%;
+    --ring: 226 100% 65%;
 
     --radius: 0.75rem;
-    /* Slightly larger radius for premium feel */
   }
 }
 
