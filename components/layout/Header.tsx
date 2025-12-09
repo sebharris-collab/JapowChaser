@@ -7,6 +7,7 @@ import { Button } from "@/components/ui/button";
 import { cn } from "@/lib/utils";
 import { Input } from "@/components/ui/input";
 import { JAPANESE_RESORTS } from "@/lib/constants";
+import { Analytics } from "@vercel/analytics/next"
 
 interface HeaderProps {
     onAddResort: (resortId: string) => void;
@@ -168,6 +169,7 @@ export function Header({
                     </Button>
                 </div>
             </div>
+            <Analytics />
         </header>
     );
 }
