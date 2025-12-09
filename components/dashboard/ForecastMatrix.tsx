@@ -14,7 +14,7 @@ interface ForecastMatrixProps {
 export function ForecastMatrix({ forecasts, loading }: ForecastMatrixProps) {
     if (loading) {
         return (
-            <div className="w-full h-64 flex items-center justify-center text-muted-foreground animate-pulse bg-muted/20 rounded-lg">
+            <div className="w-full h-64 flex items-center justify-center text-slate-500 animate-pulse bg-slate-900/50 rounded-lg border border-slate-800">
                 Loading matrix data...
             </div>
         );
@@ -22,7 +22,7 @@ export function ForecastMatrix({ forecasts, loading }: ForecastMatrixProps) {
 
     if (forecasts.length === 0) {
         return (
-            <div className="text-center p-12 border-2 border-dashed rounded-xl text-muted-foreground">
+            <div className="text-center p-12 border border-dashed border-slate-800 rounded-xl text-slate-500 bg-slate-950/50">
                 No resorts selected.
             </div>
         );
@@ -35,88 +35,79 @@ export function ForecastMatrix({ forecasts, loading }: ForecastMatrixProps) {
         return scoreB - scoreA;
     });
 
-    // Get date headers from the first forecast (assuming all cover same range)
-    // We skip the first 2 days (history) for the forecast view usually?
-    // User wants "future" comparison mostly, but history is nice.
-    // Let's mimic ResortCard: History (Past 24h) is separate, Matrix usually shows FUTURE.
-    // However, showing the flow from yesterday -> next week is powerful.
-    // Let's show: Past 24h | Today | +1 | +2 ...
-
-    // Actually, ResortCard shows Past 24h/48h as stats, then Daily List starts from TODAY.
-    // Let's stick to that for consistency. Matrix starts from "Today".
-
     const firstResort = sortedForecasts[0];
     const daysToShow = firstResort.daily.slice(2); // Skip past 2 days
 
-    const getSnowColor = (cm: number) => {
-        if (cm === 0) return "bg-transparent text-muted-foreground";
-        if (cm < 5) return "bg-blue-50 text-blue-900 dark:bg-blue-950/30 dark:text-blue-200";
-        if (cm < 15) return "bg-blue-200 text-blue-900 dark:bg-blue-900/60 dark:text-blue-100";
-        if (cm < 30) return "bg-blue-400 text-white dark:bg-blue-700 dark:text-white";
-        if (cm < 50) return "bg-indigo-500 text-white font-bold";
-        return "bg-purple-600 text-white font-bold animate-pulse";
+    const getSnowStyle = (cm: number) => {
+        if (cm === 0) return "bg-transparent text-slate-600";
+        // Gradient scale from faint blue to deep indigo/purple
+        if (cm < 5) return "bg-indigo-950/30 text-indigo-200/70";
+        if (cm < 15) return "bg-indigo-900/40 text-indigo-100";
+        if (cm < 30) return "bg-indigo-600/60 text-white font-medium";
+        if (cm < 50) return "bg-indigo-600 text-white font-bold shadow-lg shadow-indigo-500/20";
+        return "bg-purple-600 text-white font-bold animate-pulse shadow-lg shadow-purple-500/20";
     };
 
     return (
-        <div className="overflow-x-auto rounded-lg border bg-card text-card-foreground shadow-sm">
-            <table className="w-full text-sm text-left">
-                <thead className="bg-muted/50 text-xs uppercase text-muted-foreground font-medium">
+        <div className="overflow-x-auto rounded-xl border border-slate-800 bg-slate-950/40 backdrop-blur-sm shadow-2xl">
+            <table className="w-full text-sm text-left border-collapse">
+                <thead className="bg-slate-900/80 text-[10px] uppercase text-slate-400 font-semibold tracking-wider backdrop-blur-md">
                     <tr>
-                        <th className="px-4 py-3 min-w-[150px] sticky left-0 bg-background/95 backdrop-blur z-10 border-b">
+                        <th className="px-6 py-4 min-w-[180px] sticky left-0 bg-slate-950/95 z-20 border-b border-r border-slate-800">
                             Resort
                         </th>
-                        <th className="px-2 py-3 text-center border-b w-[80px]">
+                        <th className="px-4 py-4 text-center border-b border-r border-slate-800 w-[80px] bg-slate-900/50">
                             Score
                         </th>
                         {daysToShow.map((day) => (
-                            <th key={day.date} className="px-2 py-3 text-center min-w-[60px] border-b">
+                            <th key={day.date} className="px-2 py-4 text-center min-w-[80px] border-b border-slate-800 text-slate-300">
                                 {new Date(day.date).toLocaleDateString(undefined, { weekday: 'short', day: 'numeric' })}
                             </th>
                         ))}
                     </tr>
                 </thead>
-                <tbody className="divide-y">
+                <tbody className="divide-y divide-slate-800/50">
                     {sortedForecasts.map((forecast) => {
                         const resort = JAPANESE_RESORTS.find(r => r.id === forecast.resortId);
                         const score = calculatePowderScore(forecast.daily);
                         const displayDays = forecast.daily.slice(2);
 
                         return (
-                            <tr key={forecast.resortId} className="hover:bg-muted/50 transition-colors">
-                                <td className="px-4 py-3 font-medium sticky left-0 bg-background/95 backdrop-blur z-10 border-r">
+                            <tr key={forecast.resortId} className="group hover:bg-slate-900/40 transition-colors">
+                                <td className="px-6 py-4 font-medium sticky left-0 bg-slate-950 z-10 border-r border-slate-800 group-hover:bg-slate-900 transition-colors">
                                     <div className="flex flex-col">
-                                        <span>{resort?.name || forecast.resortId}</span>
-                                        <span className="text-xs text-muted-foreground font-normal">{resort?.region}</span>
+                                        <span className="text-slate-200 font-semibold tracking-tight text-base">{resort?.name || forecast.resortId}</span>
+                                        <span className="text-[10px] text-slate-500 font-medium uppercase tracking-wider">{resort?.region}</span>
                                     </div>
                                 </td>
-                                <td className="px-2 py-3 text-center font-bold text-primary border-r bg-muted/10">
+                                <td className="px-4 py-4 text-center font-bold text-lg text-indigo-400 border-r border-slate-800 bg-slate-900/20">
                                     {score}
                                 </td>
                                 {displayDays.map((day) => (
-                                    <td key={day.date} className="p-0 text-center border-r last:border-0 h-full">
-                                        <TooltipProvider>
+                                    <td key={day.date} className="p-1 text-center border-r border-slate-800/50 last:border-0 h-full align-middle">
+                                        <TooltipProvider delayDuration={0}>
                                             <Tooltip>
                                                 <TooltipTrigger asChild>
                                                     <div className={cn(
-                                                        "h-full w-full flex items-center justify-center py-4 cursor-help transition-colors",
-                                                        getSnowColor(day.snowfall_sum)
+                                                        "h-12 w-full flex items-center justify-center rounded-md cursor-help transition-all duration-300 mx-auto",
+                                                        getSnowStyle(day.snowfall_sum)
                                                     )}>
-                                                        {day.snowfall_sum > 0 ? day.snowfall_sum.toFixed(0) : "-"}
+                                                        {day.snowfall_sum > 0 ? day.snowfall_sum.toFixed(0) : <span className="text-slate-700">-</span>}
                                                     </div>
                                                 </TooltipTrigger>
-                                                <TooltipContent className="text-xs p-2">
-                                                    <div className="font-bold mb-1">{new Date(day.date).toLocaleDateString()}</div>
-                                                    <div className="space-y-1">
+                                                <TooltipContent className="text-xs p-3 bg-slate-900 border-slate-800 text-slate-200 shadow-xl">
+                                                    <div className="font-bold mb-2 text-indigo-400">{new Date(day.date).toLocaleDateString()}</div>
+                                                    <div className="space-y-1.5">
                                                         <div className="flex items-center gap-2">
-                                                            <Thermometer className="w-3 h-3" />
+                                                            <Thermometer className="w-3 h-3 text-slate-400" />
                                                             {day.temperature_2m_min?.toFixed(0)}° / {day.temperature_2m_max?.toFixed(0)}°
                                                         </div>
                                                         <div className="flex items-center gap-2">
-                                                            <Wind className="w-3 h-3" />
+                                                            <Wind className="w-3 h-3 text-slate-400" />
                                                             {day.wind_speed_10m_max.toFixed(0)} km/h
                                                         </div>
                                                         <div className="flex items-center gap-2">
-                                                            <Eye className="w-3 h-3" />
+                                                            <Eye className="w-3 h-3 text-slate-400" />
                                                             {(day.visibility_min / 1000).toFixed(1)} km
                                                         </div>
                                                     </div>
