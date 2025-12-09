@@ -56,13 +56,10 @@ export function ResortCombobox({ onSelect, filterRegion }: ComboboxProps) {
                                     <CommandItem
                                         key={resort.id}
                                         value={resort.name}
-                                        onSelect={(currentValue) => {
-                                            // CommandItem value uses the name (label), so we find the ID
-                                            const selectedResort = JAPANESE_RESORTS.find((r) => r.name.toLowerCase() === currentValue.toLowerCase());
-                                            if (selectedResort) {
-                                                setValue(selectedResort.id);
-                                                onSelect(selectedResort.id);
-                                            }
+                                        className="cursor-pointer"
+                                        onSelect={() => {
+                                            setValue(resort.id);
+                                            onSelect(resort.id);
                                             setOpen(false)
                                         }}
                                     >

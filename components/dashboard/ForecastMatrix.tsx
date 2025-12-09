@@ -2,16 +2,17 @@
 
 import { ForecastResult, WeatherData } from "@/lib/weather";
 import { JAPANESE_RESORTS } from "@/lib/constants";
-import { calculatePowderScore, cn } from "@/lib/utils";
+import { calculatePowderScore, rankResorts, UserPreferences, cn } from "@/lib/utils";
 import { Tooltip, TooltipContent, TooltipProvider, TooltipTrigger } from "@/components/ui/tooltip";
 import { Wind, Thermometer, Eye } from "lucide-react";
 
 interface ForecastMatrixProps {
     forecasts: ForecastResult[];
     loading: boolean;
+    userPrefs: UserPreferences;
 }
 
-export function ForecastMatrix({ forecasts, loading }: ForecastMatrixProps) {
+export function ForecastMatrix({ forecasts, loading, userPrefs }: ForecastMatrixProps) {
     if (loading) {
         return (
             <div className="w-full h-64 flex items-center justify-center text-muted-foreground animate-pulse bg-muted/20 rounded-lg border border-border">
@@ -28,15 +29,19 @@ export function ForecastMatrix({ forecasts, loading }: ForecastMatrixProps) {
         );
     }
 
-    // Sort by score
-    const sortedForecasts = [...forecasts].sort((a, b) => {
-        const scoreA = calculatePowderScore(a.daily);
-        const scoreB = calculatePowderScore(b.daily);
-        return scoreB - scoreA;
-    });
+    // Sort by Ranked Score using User Prefs
+    const scoredResorts = rankResorts(
+        forecasts.map(f => ({ id: f.resortId, data: f.daily })),
+        userPrefs
+    );
 
-    const firstResort = sortedForecasts[0];
-    const daysToShow = firstResort.daily.slice(2); // Skip past 2 days
+    const firstResortId = scoredResorts[0]?.resortId;
+    const firstForecast = forecasts.find(f => f.resortId === firstResortId);
+
+    // Safety check if no data
+    if (!firstForecast) return null;
+
+    const daysToShow = firstForecast.daily.slice(2); // Skip past 2 days
 
     const getSnowStyle = (cm: number) => {
         if (cm === 0) return "bg-transparent text-muted-foreground";
@@ -59,7 +64,7 @@ export function ForecastMatrix({ forecasts, loading }: ForecastMatrixProps) {
                             Resort
                         </th>
                         <th className="px-4 py-4 text-center border-b border-r border-border w-[80px] bg-muted/30">
-                            Score
+                            Rank
                         </th>
                         {daysToShow.map((day) => (
                             <th key={day.date} className="px-2 py-4 text-center min-w-[80px] border-b border-border text-foreground">
@@ -69,21 +74,23 @@ export function ForecastMatrix({ forecasts, loading }: ForecastMatrixProps) {
                     </tr>
                 </thead>
                 <tbody className="divide-y divide-border/50">
-                    {sortedForecasts.map((forecast) => {
-                        const resort = JAPANESE_RESORTS.find(r => r.id === forecast.resortId);
-                        const score = calculatePowderScore(forecast.daily);
+                    {scoredResorts.map((scoreData) => {
+                        const forecast = forecasts.find(f => f.resortId === scoreData.resortId);
+                        if (!forecast) return null;
+
+                        const resort = JAPANESE_RESORTS.find(r => r.id === scoreData.resortId);
                         const displayDays = forecast.daily.slice(2);
 
                         return (
-                            <tr key={forecast.resortId} className="group hover:bg-muted/30 transition-colors">
+                            <tr key={scoreData.resortId} className="group hover:bg-muted/30 transition-colors">
                                 <td className="px-6 py-4 font-medium sticky left-0 bg-card z-10 border-r border-border group-hover:bg-card transition-colors">
                                     <div className="flex flex-col">
-                                        <span className="text-foreground font-semibold tracking-tight text-base">{resort?.name || forecast.resortId}</span>
+                                        <span className="text-foreground font-semibold tracking-tight text-base">{resort?.name || scoreData.resortId}</span>
                                         <span className="text-[10px] text-muted-foreground font-medium uppercase tracking-wider">{resort?.region}</span>
                                     </div>
                                 </td>
                                 <td className="px-4 py-4 text-center font-bold text-lg text-primary border-r border-border bg-muted/10">
-                                    {score}
+                                    <span className="text-sm align-top mr-0.5 opacity-50">#</span>{scoreData.rank}
                                 </td>
                                 {displayDays.map((day) => (
                                     <td key={day.date} className="p-1 text-center border-r border-border/50 last:border-0 h-full align-middle">

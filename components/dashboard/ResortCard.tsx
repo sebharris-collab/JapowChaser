@@ -12,10 +12,13 @@ interface ResortCardProps {
     name: string;
     region: string;
     data: WeatherData[];
+    rank?: number; // Ordinal rank (1, 2, 3...)
+    tags?: string[];
     loading?: boolean;
+    percentile?: number; // Kept for compat if needed, but we prefer rank
 }
 
-export function ResortCard({ name, region, data, loading }: ResortCardProps) {
+export function ResortCard({ name, region, data, rank, tags = [], loading }: ResortCardProps) {
     const [isExpanded, setIsExpanded] = useState(false);
 
     if (loading) {
@@ -36,8 +39,6 @@ export function ResortCard({ name, region, data, loading }: ResortCardProps) {
     const past24hSnow = historyData.length > 1 ? (historyData[1].snowfall_sum || 0) : 0;
     const past48hSnow = historyData.reduce((acc, day) => acc + (day.snowfall_sum || 0), 0);
 
-    const powderScore = calculatePowderScore(forecastData);
-
     return (
         <Card
             className={cn(
@@ -53,12 +54,23 @@ export function ResortCard({ name, region, data, loading }: ResortCardProps) {
                 <div className="flex justify-between items-start">
                     <div>
                         <CardTitle className="text-xl font-bold tracking-tight text-foreground">{name}</CardTitle>
-                        <CardDescription className="text-muted-foreground font-medium">{region}</CardDescription>
+                        <CardDescription className="text-muted-foreground font-medium flex items-center gap-2">
+                            {region}
+                            {/* Display Tags */}
+                            <div className="flex gap-1 ml-2">
+                                {tags.map(tag => (
+                                    <Badge key={tag} variant="secondary" className="text-[9px] h-4 px-1 bg-indigo-500/10 text-indigo-500 border-indigo-500/20">{tag}</Badge>
+                                ))}
+                            </div>
+                        </CardDescription>
                     </div>
                     <div className="flex items-center gap-4">
                         <div className="text-right">
-                            <div className="text-3xl font-bold text-primary tracking-tighter">{powderScore}</div>
-                            <div className="text-[10px] text-muted-foreground uppercase tracking-widest font-semibold">Score</div>
+                            <div className="text-3xl font-bold text-primary tracking-tighter">
+                                {rank ? <span className="text-lg align-top mr-0.5 text-muted-foreground">#</span> : null}
+                                {rank ? rank : '-'}
+                            </div>
+                            <div className="text-[10px] text-muted-foreground uppercase tracking-widest font-semibold">Rank</div>
                         </div>
                         <div className="text-muted-foreground group-hover:text-foreground transition-colors">
                             {isExpanded ? <ChevronUp className="w-5 h-5" /> : <ChevronDown className="w-5 h-5" />}

@@ -1,12 +1,15 @@
 "use strict";
 
 import { useEffect, useState } from "react";
-import { Snowflake, LayoutGrid, Table, Filter, Sun, Moon, Calendar as CalendarIcon } from "lucide-react";
+import { Snowflake, LayoutGrid, Table, Filter, Sun, Moon, Calendar as CalendarIcon, SlidersHorizontal } from "lucide-react";
 import { ResortCombobox } from "@/components/ui/combobox";
 import { Button } from "@/components/ui/button";
-import { cn } from "@/lib/utils";
+import { cn, UserPreferences } from "@/lib/utils";
 import { Input } from "@/components/ui/input";
 import { JAPANESE_RESORTS } from "@/lib/constants";
+import { Popover, PopoverContent, PopoverTrigger } from "@/components/ui/popover";
+import { Label } from "@/components/ui/label";
+import { Slider } from "@/components/ui/slider";
 
 interface HeaderProps {
     onAddResort: (resortId: string) => void;
@@ -18,6 +21,8 @@ interface HeaderProps {
     onViewModeChange: (mode: "grid" | "matrix") => void;
     selectedRegion: string;
     onRegionChange: (region: string) => void;
+    userPrefs: UserPreferences;
+    onPrefsChange: (prefs: UserPreferences) => void;
 }
 
 export function Header({
@@ -29,7 +34,9 @@ export function Header({
     viewMode,
     onViewModeChange,
     selectedRegion,
-    onRegionChange
+    onRegionChange,
+    userPrefs,
+    onPrefsChange
 }: HeaderProps) {
     const [theme, setTheme] = useState<"dark" | "light">("dark");
 
@@ -56,6 +63,13 @@ export function Header({
 
     const handleEndChange = (e: React.ChangeEvent<HTMLInputElement>) => {
         onDateChange(startDate, e.target.value);
+    };
+
+    const updatePref = (key: keyof UserPreferences, value: number[]) => {
+        onPrefsChange({
+            ...userPrefs,
+            [key]: value[0]
+        });
     };
 
     return (
@@ -138,6 +152,73 @@ export function Header({
                     <ResortCombobox onSelect={onAddResort} filterRegion={selectedRegion} />
 
                     <div className="h-6 w-px bg-border mx-2 hidden sm:block" />
+
+                    {/* Preferences Button */}
+                    <Popover>
+                        <PopoverTrigger asChild>
+                            <Button variant="outline" size="sm" className="h-10 gap-2 border-dashed text-muted-foreground hover:text-foreground hover:border-primary/50">
+                                <SlidersHorizontal className="h-4 w-4" />
+                                <span className="hidden sm:inline">Preferences</span>
+                            </Button>
+                        </PopoverTrigger>
+                        <PopoverContent className="w-80 p-4" align="center">
+                            <div className="space-y-4">
+                                <h4 className="font-medium leading-none text-foreground border-b pb-2">Scoring Weights</h4>
+
+                                <div className="space-y-3">
+                                    <div className="space-y-1">
+                                        <div className="flex justify-between">
+                                            <Label className="text-xs text-muted-foreground">Snow Quantity</Label>
+                                            <span className="text-xs font-bold text-primary">{userPrefs.snowWeight}</span>
+                                        </div>
+                                        <Slider
+                                            value={[userPrefs.snowWeight]}
+                                            min={0} max={10} step={1}
+                                            onValueChange={(v) => updatePref('snowWeight', v)}
+                                        />
+                                    </div>
+
+                                    <div className="space-y-1">
+                                        <div className="flex justify-between">
+                                            <Label className="text-xs text-muted-foreground">Snow Quality (Temp)</Label>
+                                            <span className="text-xs font-bold text-primary">{userPrefs.tempWeight}</span>
+                                        </div>
+                                        <Slider
+                                            value={[userPrefs.tempWeight]}
+                                            min={0} max={10} step={1}
+                                            onValueChange={(v) => updatePref('tempWeight', v)}
+                                        />
+                                    </div>
+
+                                    <div className="space-y-1">
+                                        <div className="flex justify-between">
+                                            <Label className="text-xs text-muted-foreground">Bluebird / Vis</Label>
+                                            <span className="text-xs font-bold text-primary">{userPrefs.bluebirdWeight}</span>
+                                        </div>
+                                        <Slider
+                                            value={[userPrefs.bluebirdWeight]}
+                                            min={0} max={10} step={1}
+                                            onValueChange={(v) => updatePref('bluebirdWeight', v)}
+                                        />
+                                    </div>
+
+                                    <div className="space-y-1">
+                                        <div className="flex justify-between">
+                                            <Label className="text-xs text-muted-foreground text-red-400">Wind Tolerance</Label>
+                                            <span className="text-xs font-bold text-red-500">{userPrefs.windWeight}</span>
+                                        </div>
+                                        <Slider
+                                            value={[userPrefs.windWeight]}
+                                            min={0} max={10} step={1}
+                                            className="[&_.relative]:bg-red-200 [&_[role=slider]]:border-red-500 [&_[role=slider]]:focus-visible:ring-red-500"
+                                            onValueChange={(v) => updatePref('windWeight', v)}
+                                        />
+                                        <p className="text-[10px] text-muted-foreground">Higher = Avoid wind more aggressively</p>
+                                    </div>
+                                </div>
+                            </div>
+                        </PopoverContent>
+                    </Popover>
 
                     {/* Date Picker */}
                     <div className="flex items-center gap-2 border rounded-lg px-3 py-1.5 bg-card shadow-sm border-input hover:border-primary/50 transition-colors">

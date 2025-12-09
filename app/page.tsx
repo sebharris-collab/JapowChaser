@@ -5,6 +5,7 @@ import { Header } from "@/components/layout/Header";
 import { DashboardGrid } from "@/components/dashboard/DashboardGrid";
 import { ForecastMatrix } from "@/components/dashboard/ForecastMatrix";
 import { JAPANESE_RESORTS } from "@/lib/constants";
+import { DEFAULT_PREFERENCES, UserPreferences } from "@/lib/utils";
 import { fetchForecast, ForecastResult, WeatherData } from "@/lib/weather";
 
 export default function Home() {
@@ -94,11 +95,12 @@ export default function Home() {
 
     // Handlers
     const handleAddResort = (resortId: string) => {
-        if (!selectedResorts.includes(resortId)) {
-            const updated = [...selectedResorts, resortId];
-            setSelectedResorts(updated);
+        setSelectedResorts(prev => {
+            if (prev.includes(resortId)) return prev;
+            const updated = [...prev, resortId];
             localStorage.setItem("japow_resorts", JSON.stringify(updated));
-        }
+            return updated;
+        });
     };
 
     const handleDateChange = (start: string, end: string) => {
@@ -119,6 +121,9 @@ export default function Home() {
         return resort?.region === selectedRegion;
     });
 
+    // Preferences
+    const [userPrefs, setUserPrefs] = useState<UserPreferences>(DEFAULT_PREFERENCES);
+
     return (
         <div className="min-h-screen flex flex-col">
             <Header
@@ -131,6 +136,8 @@ export default function Home() {
                 onViewModeChange={setViewMode}
                 selectedRegion={selectedRegion}
                 onRegionChange={setSelectedRegion}
+                userPrefs={userPrefs}
+                onPrefsChange={setUserPrefs}
             />
 
             <main className="flex-1 container py-6">
@@ -141,9 +148,9 @@ export default function Home() {
                 )}
 
                 {viewMode === 'grid' ? (
-                    <DashboardGrid forecasts={filteredForecasts} loading={loading} />
+                    <DashboardGrid forecasts={filteredForecasts} loading={loading} userPrefs={userPrefs} />
                 ) : (
-                    <ForecastMatrix forecasts={filteredForecasts} loading={loading} />
+                    <ForecastMatrix forecasts={filteredForecasts} loading={loading} userPrefs={userPrefs} />
                 )}
             </main>
         </div>

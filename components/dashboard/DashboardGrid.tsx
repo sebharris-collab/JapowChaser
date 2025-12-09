@@ -1,17 +1,74 @@
 "use client";
 
-import { useState } from "react";
+import { useState, useLayoutEffect, useRef } from "react";
 import { ForecastResult } from "@/lib/weather";
 import { ResortCard } from "@/components/dashboard/ResortCard";
-import { calculatePowderScore } from "@/lib/utils";
+import { rankResorts, UserPreferences } from "@/lib/utils";
 import { JAPANESE_RESORTS } from "@/lib/constants";
 
 interface DashboardGridProps {
     forecasts: ForecastResult[];
     loading: boolean;
+    userPrefs: UserPreferences;
 }
 
-export function DashboardGrid({ forecasts, loading }: DashboardGridProps) {
+// Custom Hook for FLIP Animations
+function useFlip(trigger: any) {
+    const refs = useRef(new Map<string, HTMLElement>());
+    const positions = useRef(new Map<string, DOMRect>());
+
+    useLayoutEffect(() => {
+        // FLIP Logic
+        const anims: Animation[] = [];
+
+        refs.current.forEach((element, id) => {
+            if (!element) return;
+
+            const newRect = element.getBoundingClientRect();
+            const oldRect = positions.current.get(id);
+
+            if (oldRect) {
+                const dx = oldRect.left - newRect.left;
+                const dy = oldRect.top - newRect.top;
+
+                if (dx !== 0 || dy !== 0) {
+                    // Invert
+                    element.style.transform = `translate(${dx}px, ${dy}px)`;
+                    element.style.transition = 'none';
+
+                    // Play
+                    requestAnimationFrame(() => {
+                        element.style.transform = '';
+                        element.style.transition = 'transform 0.6s cubic-bezier(0.22, 1, 0.36, 1)'; // "Premium" ease-out-quintish
+                    });
+                }
+            }
+
+            // Save new position for next update
+            positions.current.set(id, newRect);
+        });
+
+    }, [trigger]); // Run when trigger changes (e.g., sort order changes)
+
+    const setRef = (id: string) => (el: HTMLElement | null) => {
+        if (el) refs.current.set(id, el);
+        else refs.current.delete(id);
+    };
+
+    return setRef;
+}
+
+export function DashboardGrid({ forecasts, loading, userPrefs }: DashboardGridProps) {
+    // Generate derived state (ranking)
+    const scoredResorts = rankResorts(
+        forecasts.map(f => ({ id: f.resortId, data: f.daily })),
+        userPrefs
+    );
+
+    // FLIP Hook - Trigger on the stringified order of IDs to catch reorders
+    const orderKey = scoredResorts.map(r => r.resortId).join(',');
+    const setRef = useFlip(orderKey);
+
     if (loading) {
         return (
             <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6 p-6">
@@ -31,26 +88,24 @@ export function DashboardGrid({ forecasts, loading }: DashboardGridProps) {
         );
     }
 
-    // Sorting logic based on Powder Score
-    const sortedForecasts = [...forecasts].sort((a, b) => {
-        const scoreA = calculatePowderScore(a.daily);
-        const scoreB = calculatePowderScore(b.daily);
-        return scoreB - scoreA;
-    });
-
     return (
         <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6 p-6 items-start">
-            {sortedForecasts.map((forecast) => {
-                const resort = JAPANESE_RESORTS.find((r) => r.id === forecast.resortId);
-                if (!resort) return null;
+            {scoredResorts.map((scoreData) => {
+                const forecast = forecasts.find(f => f.resortId === scoreData.resortId);
+                const resort = JAPANESE_RESORTS.find((r) => r.id === scoreData.resortId);
+
+                if (!forecast || !resort) return null;
 
                 return (
-                    <ResortCard
-                        key={forecast.resortId}
-                        name={resort.name}
-                        region={resort.region}
-                        data={forecast.daily}
-                    />
+                    <div ref={setRef(scoreData.resortId)} key={scoreData.resortId} className="h-full">
+                        <ResortCard
+                            name={resort.name}
+                            region={resort.region}
+                            data={forecast.daily}
+                            rank={scoreData.rank}
+                            tags={scoreData.tags}
+                        />
+                    </div>
                 );
             })}
         </div>
