@@ -36,7 +36,7 @@ export function ResortCombobox({ onSelect, filterRegion }: ComboboxProps) {
                     variant="outline"
                     role="combobox"
                     aria-expanded={open}
-                    className="w-[200px] justify-between"
+                    className="w-[200px] justify-between text-foreground"
                 >
                     {value
                         ? JAPANESE_RESORTS.find((resort) => resort.id === value)?.name

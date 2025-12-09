@@ -76,7 +76,7 @@ export function Header({
                             <select
                                 value={selectedRegion}
                                 onChange={(e) => onRegionChange(e.target.value)}
-                                className="h-9 w-[140px] rounded-md border border-input bg-background/50 px-3 py-1 text-sm shadow-sm transition-all focus-visible:outline-none focus-visible:ring-1 focus-visible:ring-ring appearance-none pl-9 cursor-pointer hover:bg-accent hover:text-accent-foreground font-medium"
+                                className="h-9 w-[140px] rounded-md border border-input bg-background/50 px-3 py-1 text-sm shadow-sm transition-all focus-visible:outline-none focus-visible:ring-1 focus-visible:ring-ring appearance-none pl-9 cursor-pointer hover:bg-accent hover:text-accent-foreground font-medium text-foreground"
                             >
                                 <option value="ALL">All Regions</option>
                                 {regions.map((r) => (
