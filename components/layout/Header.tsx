@@ -1,7 +1,7 @@
 "use strict";
 
 import { useEffect, useState } from "react";
-import { Snowflake, LayoutGrid, Table, Filter, Sun, Moon } from "lucide-react";
+import { Snowflake, LayoutGrid, Table, Filter, Sun, Moon, Calendar as CalendarIcon } from "lucide-react";
 import { ResortCombobox } from "@/components/ui/combobox";
 import { Button } from "@/components/ui/button";
 import { cn } from "@/lib/utils";
@@ -33,7 +33,6 @@ export function Header({
 }: HeaderProps) {
     const [theme, setTheme] = useState<"dark" | "light">("dark");
 
-    // Initialize theme from HTML or LocalStorage
     useEffect(() => {
         const isDark = document.documentElement.classList.contains("dark");
         setTheme(isDark ? "dark" : "light");
@@ -49,7 +48,6 @@ export function Header({
         }
     };
 
-    // Calculate unique regions
     const regions = Array.from(new Set(JAPANESE_RESORTS.map(r => r.region)));
 
     const handleStartChange = (e: React.ChangeEvent<HTMLInputElement>) => {
@@ -61,95 +59,112 @@ export function Header({
     };
 
     return (
-        <header className="sticky top-0 z-40 w-full border-b bg-background/80 backdrop-blur-md supports-[backdrop-filter]:bg-background/60">
-            <div className="container flex h-16 items-center justify-between">
-                <div className="flex gap-6 items-center">
-                    <div className="flex items-center gap-2 font-bold text-xl text-foreground md:mr-4 tracking-tight">
-                        <div className="bg-primary rounded-md p-1">
-                            <Snowflake className="h-4 w-4 text-primary-foreground" />
-                        </div>
-                        <span className="hidden lg:inline-block">JapowChaser</span>
+        <header className="sticky top-0 z-40 w-full border-b bg-background/80 backdrop-blur-md supports-[backdrop-filter]:bg-background/60 py-4 transition-all duration-300">
+            <div className="container flex flex-col gap-4">
+                {/* Top Row: Theme Toggle (Left) - Brand (Center) - View Toggle (Right) */}
+                <div className="grid grid-cols-3 items-center w-full">
+                    {/* Left: Theme */}
+                    <div className="flex justify-start">
+                        <Button variant="ghost" size="icon" onClick={toggleTheme} className="h-9 w-9 rounded-full text-muted-foreground hover:text-foreground">
+                            {theme === 'dark' ? <Sun className="h-4 w-4" /> : <Moon className="h-4 w-4" />}
+                        </Button>
                     </div>
 
-                    <div className="flex items-center gap-3">
-                        <div className="relative group">
-                            <select
-                                value={selectedRegion}
-                                onChange={(e) => onRegionChange(e.target.value)}
-                                className="h-9 w-[140px] rounded-md border border-input bg-background/50 px-3 py-1 text-sm shadow-sm transition-all focus-visible:outline-none focus-visible:ring-1 focus-visible:ring-ring appearance-none pl-9 cursor-pointer hover:bg-accent hover:text-accent-foreground font-medium text-foreground"
-                            >
-                                <option value="ALL">All Regions</option>
-                                {regions.map((r) => (
-                                    <option key={r} value={r}>{r}</option>
-                                ))}
-                            </select>
-                            <Filter className="absolute left-2.5 top-2.5 h-4 w-4 text-muted-foreground pointer-events-none" />
+                    {/* Center: Brand */}
+                    <div className="flex justify-center">
+                        <div className="flex items-center gap-2 font-bold text-2xl text-foreground tracking-tight">
+                            <div className="bg-primary rounded-lg p-1.5 shadow-lg shadow-primary/20">
+                                <Snowflake className="h-5 w-5 text-primary-foreground" />
+                            </div>
+                            <span>JapowChaser</span>
                         </div>
+                    </div>
 
-                        <ResortCombobox onSelect={onAddResort} filterRegion={selectedRegion} />
-
-                        <Button
-                            variant="ghost"
-                            size="sm"
-                            onClick={onResetResorts}
-                            className="text-muted-foreground hover:text-destructive hover:bg-destructive/10 hidden sm:flex h-9"
-                        >
-                            Clear
-                        </Button>
+                    {/* Right: View Toggle */}
+                    <div className="flex justify-end">
+                        <div className="flex items-center border rounded-md p-1 bg-muted/40">
+                            <Button
+                                variant="ghost"
+                                size="icon"
+                                onClick={() => onViewModeChange('grid')}
+                                className={cn(
+                                    "h-7 w-7 rounded-sm transition-all",
+                                    viewMode === 'grid'
+                                        ? "bg-background text-foreground shadow-sm"
+                                        : "text-muted-foreground hover:text-foreground hover:bg-background/50"
+                                )}
+                                title="Grid View"
+                            >
+                                <LayoutGrid className="h-4 w-4" />
+                            </Button>
+                            <Button
+                                variant="ghost"
+                                size="icon"
+                                onClick={() => onViewModeChange('matrix')}
+                                className={cn(
+                                    "h-7 w-7 rounded-sm transition-all",
+                                    viewMode === 'matrix'
+                                        ? "bg-background text-foreground shadow-sm"
+                                        : "text-muted-foreground hover:text-foreground hover:bg-background/50"
+                                )}
+                                title="Matrix View"
+                            >
+                                <Table className="h-4 w-4" />
+                            </Button>
+                        </div>
                     </div>
                 </div>
 
-                <div className="flex items-center gap-4">
-                    {/* View Toggle */}
-                    <div className="flex items-center border rounded-md p-1 bg-muted/40">
-                        <Button
-                            variant="ghost"
-                            size="icon"
-                            onClick={() => onViewModeChange('grid')}
-                            className={cn(
-                                "h-7 w-7 rounded-sm transition-all",
-                                viewMode === 'grid'
-                                    ? "bg-background text-foreground shadow-sm"
-                                    : "text-muted-foreground hover:text-foreground hover:bg-background/50"
-                            )}
-                            title="Grid View"
+                {/* Bottom Row: Controls (Centered) */}
+                <div className="flex flex-wrap items-center justify-center gap-3 w-full">
+                    {/* Region Filter */}
+                    <div className="relative group">
+                        <select
+                            value={selectedRegion}
+                            onChange={(e) => onRegionChange(e.target.value)}
+                            className="h-10 w-[150px] rounded-lg border border-input bg-card px-3 py-1 text-sm shadow-sm transition-all focus-visible:outline-none focus-visible:ring-1 focus-visible:ring-ring appearance-none pl-9 cursor-pointer hover:border-primary/50 text-foreground font-medium"
                         >
-                            <LayoutGrid className="h-4 w-4" />
-                        </Button>
-                        <Button
-                            variant="ghost"
-                            size="icon"
-                            onClick={() => onViewModeChange('matrix')}
-                            className={cn(
-                                "h-7 w-7 rounded-sm transition-all",
-                                viewMode === 'matrix'
-                                    ? "bg-background text-foreground shadow-sm"
-                                    : "text-muted-foreground hover:text-foreground hover:bg-background/50"
-                            )}
-                            title="Matrix View"
-                        >
-                            <Table className="h-4 w-4" />
-                        </Button>
+                            <option value="ALL">All Regions</option>
+                            {regions.map((r) => (
+                                <option key={r} value={r}>{r}</option>
+                            ))}
+                        </select>
+                        <Filter className="absolute left-3 top-3 h-4 w-4 text-muted-foreground pointer-events-none" />
                     </div>
 
-                    <div className="flex items-center gap-2 border rounded-md p-1 bg-muted/40 hidden sm:flex">
+                    <div className="h-6 w-px bg-border mx-2 hidden sm:block" />
+
+                    {/* Resort Search */}
+                    <ResortCombobox onSelect={onAddResort} filterRegion={selectedRegion} />
+
+                    <div className="h-6 w-px bg-border mx-2 hidden sm:block" />
+
+                    {/* Date Picker */}
+                    <div className="flex items-center gap-2 border rounded-lg px-3 py-1.5 bg-card shadow-sm border-input hover:border-primary/50 transition-colors">
+                        <CalendarIcon className="h-4 w-4 text-primary" />
                         <Input
                             type="date"
                             value={startDate}
                             onChange={handleStartChange}
-                            className="h-7 w-fit border-0 bg-transparent focus-visible:ring-0 px-2 text-xs"
+                            className="h-6 w-fit border-0 bg-transparent focus-visible:ring-0 p-0 text-sm text-foreground [&::-webkit-calendar-picker-indicator]:hidden"
                         />
-                        <span className="text-muted-foreground text-xs">-</span>
+                        <span className="text-muted-foreground text-xs font-medium">to</span>
                         <Input
                             type="date"
                             value={endDate}
                             onChange={handleEndChange}
-                            className="h-7 w-fit border-0 bg-transparent focus-visible:ring-0 px-2 text-xs"
+                            className="h-6 w-fit border-0 bg-transparent focus-visible:ring-0 p-0 text-sm text-foreground [&::-webkit-calendar-picker-indicator]:hidden"
                         />
                     </div>
 
-                    <Button variant="ghost" size="icon" onClick={toggleTheme} className="h-9 w-9 rounded-full">
-                        {theme === 'dark' ? <Sun className="h-4 w-4" /> : <Moon className="h-4 w-4" />}
+                    {/* Clear Button */}
+                    <Button
+                        variant="outline"
+                        size="sm"
+                        onClick={onResetResorts}
+                        className="h-10 text-muted-foreground hover:text-destructive hover:bg-destructive/10 hover:border-destructive/30 border-dashed"
+                    >
+                        Clear
                     </Button>
                 </div>
             </div>
