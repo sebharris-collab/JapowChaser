@@ -143,12 +143,14 @@ export function ResortCard({ name, region, data, rank, tags = [], loading }: Res
                                             {day.snowfall_sum.toFixed(0)} <span className="text-[10px] text-muted-foreground font-normal uppercase">cm</span>
                                         </div>
                                     </div>
-                                    <div className="col-span-5 flex justify-end items-center gap-2">
-                                        <div className="flex items-center gap-1 text-[10px] text-muted-foreground mr-2">
+                                    <div className="col-span-5 grid grid-cols-[1fr_auto] items-center gap-2">
+                                        <div className="flex justify-end items-center gap-2">
+                                            {isPowder && <Badge variant="default" className="bg-primary/20 text-primary border-primary/20 hover:bg-primary/30 h-5 px-1.5 text-[9px] uppercase tracking-wider font-semibold border-0">Powder</Badge>}
+                                            {isBluebird && !isPowder && <Badge variant="secondary" className="bg-sky-500/20 text-sky-600 dark:text-sky-300 border-sky-500/20 h-5 px-1.5 text-[9px] uppercase tracking-wider font-semibold border-0">Sun</Badge>}
+                                        </div>
+                                        <div className="flex items-center gap-1 text-[10px] text-muted-foreground">
                                             <Wind className="w-3 h-3" /> {day.wind_speed_10m_max.toFixed(0)}
                                         </div>
-                                        {isPowder && <Badge variant="default" className="bg-primary/20 text-primary border-primary/20 hover:bg-primary/30 h-5 px-1.5 text-[9px] uppercase tracking-wider font-semibold border-0">Powder</Badge>}
-                                        {isBluebird && !isPowder && <Badge variant="secondary" className="bg-sky-500/20 text-sky-600 dark:text-sky-300 border-sky-500/20 h-5 px-1.5 text-[9px] uppercase tracking-wider font-semibold border-0">Sun</Badge>}
                                     </div>
                                 </div>
                             );
