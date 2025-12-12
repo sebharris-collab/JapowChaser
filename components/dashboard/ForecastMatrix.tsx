@@ -56,45 +56,46 @@ export function ForecastMatrix({ forecasts, loading, userPrefs }: ForecastMatrix
     };
 
     return (
+
         <div className="overflow-x-auto rounded-xl border border-border bg-card/60 backdrop-blur-sm shadow-2xl">
-            <table className="w-full text-sm text-left border-collapse">
-                <thead className="bg-card/90 text-[10px] uppercase text-muted-foreground font-semibold tracking-wider backdrop-blur-md border-b border-primary/20">
-                    <tr>
-                        <th className="px-6 py-4 min-w-[180px] sticky left-0 bg-card z-20 border-r border-border">
-                            Resort
-                        </th>
-                        <th className="px-4 py-4 text-center border-b border-r border-border w-[80px] bg-muted/30">
-                            Rank
-                        </th>
-                        {daysToShow.map((day) => (
-                            <th key={day.date} className="px-2 py-4 text-center min-w-[80px] border-b border-border text-foreground">
-                                {new Date(day.date).toLocaleDateString(undefined, { weekday: 'short', day: 'numeric' })}
+            <TooltipProvider delayDuration={0}>
+                <table className="w-full text-sm text-left border-collapse">
+                    <thead className="bg-card/90 text-[10px] uppercase text-muted-foreground font-semibold tracking-wider backdrop-blur-md border-b border-primary/20">
+                        <tr>
+                            <th className="px-6 py-4 min-w-[180px] sticky left-0 bg-card z-20 border-r border-border">
+                                Resort
                             </th>
-                        ))}
-                    </tr>
-                </thead>
-                <tbody className="divide-y divide-border/50">
-                    {scoredResorts.map((scoreData) => {
-                        const forecast = forecasts.find(f => f.resortId === scoreData.resortId);
-                        if (!forecast) return null;
+                            <th className="px-4 py-4 text-center border-b border-r border-border w-[80px] bg-muted/30">
+                                Rank
+                            </th>
+                            {daysToShow.map((day) => (
+                                <th key={day.date} className="px-2 py-4 text-center min-w-[80px] border-b border-border text-foreground">
+                                    {new Date(day.date).toLocaleDateString(undefined, { weekday: 'short', day: 'numeric' })}
+                                </th>
+                            ))}
+                        </tr>
+                    </thead>
+                    <tbody className="divide-y divide-border/50">
+                        {scoredResorts.map((scoreData) => {
+                            const forecast = forecasts.find(f => f.resortId === scoreData.resortId);
+                            if (!forecast) return null;
 
-                        const resort = JAPANESE_RESORTS.find(r => r.id === scoreData.resortId);
-                        const displayDays = forecast.daily.slice(2);
+                            const resort = JAPANESE_RESORTS.find(r => r.id === scoreData.resortId);
+                            const displayDays = forecast.daily.slice(2);
 
-                        return (
-                            <tr key={scoreData.resortId} className="group hover:bg-muted/30 transition-colors">
-                                <td className="px-6 py-4 font-medium sticky left-0 bg-card z-10 border-r border-border group-hover:bg-card transition-colors">
-                                    <div className="flex flex-col">
-                                        <span className="text-foreground font-semibold tracking-tight text-base">{resort?.name || scoreData.resortId}</span>
-                                        <span className="text-[10px] text-muted-foreground font-medium uppercase tracking-wider">{resort?.region}</span>
-                                    </div>
-                                </td>
-                                <td className="px-4 py-4 text-center font-bold text-lg text-primary border-r border-border bg-muted/10">
-                                    <span className="text-sm align-top mr-0.5 opacity-50">#</span>{scoreData.rank}
-                                </td>
-                                {displayDays.map((day) => (
-                                    <td key={day.date} className="p-1 text-center border-r border-border/50 last:border-0 h-full align-middle">
-                                        <TooltipProvider delayDuration={0}>
+                            return (
+                                <tr key={scoreData.resortId} className="group hover:bg-muted/30 transition-colors">
+                                    <td className="px-6 py-4 font-medium sticky left-0 bg-card z-10 border-r border-border group-hover:bg-card transition-colors">
+                                        <div className="flex flex-col">
+                                            <span className="text-foreground font-semibold tracking-tight text-base">{resort?.name || scoreData.resortId}</span>
+                                            <span className="text-[10px] text-muted-foreground font-medium uppercase tracking-wider">{resort?.region}</span>
+                                        </div>
+                                    </td>
+                                    <td className="px-4 py-4 text-center font-bold text-lg text-primary border-r border-border bg-muted/10">
+                                        <span className="text-sm align-top mr-0.5 opacity-50">#</span>{scoreData.rank}
+                                    </td>
+                                    {displayDays.map((day) => (
+                                        <td key={day.date} className="p-1 text-center border-r border-border/50 last:border-0 h-full align-middle">
                                             <Tooltip>
                                                 <TooltipTrigger asChild>
                                                     <div className={cn(
@@ -104,8 +105,8 @@ export function ForecastMatrix({ forecasts, loading, userPrefs }: ForecastMatrix
                                                         {day.snowfall_sum > 0 ? day.snowfall_sum.toFixed(0) : <span className="text-muted-foreground/50">-</span>}
                                                     </div>
                                                 </TooltipTrigger>
-                                                <TooltipContent className="text-xs p-3 bg-popover border-border text-popover-foreground shadow-xl">
-                                                    <div className="font-bold mb-2 text-primary">{new Date(day.date).toLocaleDateString()}</div>
+                                                <TooltipContent collisionPadding={10} className="text-xs p-3 bg-popover border-border text-popover-foreground shadow-xl">
+                                                    <div className="font-bold mb-2 text-primary">{new Date(day.date).toLocaleDateString('en-GB')}</div>
                                                     <div className="space-y-1.5">
                                                         <div className="flex items-center gap-2">
                                                             <Thermometer className="w-3 h-3 text-muted-foreground" />
@@ -122,14 +123,15 @@ export function ForecastMatrix({ forecasts, loading, userPrefs }: ForecastMatrix
                                                     </div>
                                                 </TooltipContent>
                                             </Tooltip>
-                                        </TooltipProvider>
-                                    </td>
-                                ))}
-                            </tr>
-                        );
-                    })}
-                </tbody>
-            </table>
+                                        </td>
+                                    ))}
+                                </tr>
+                            );
+                        })}
+                    </tbody>
+                </table>
+            </TooltipProvider>
         </div>
+        // </TooltipProvider>
     );
 }
