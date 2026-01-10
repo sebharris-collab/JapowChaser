@@ -4,7 +4,7 @@ import { ForecastResult, WeatherData } from "@/lib/weather";
 import { JAPANESE_RESORTS } from "@/lib/constants";
 import { calculatePowderScore, rankResorts, UserPreferences, cn } from "@/lib/utils";
 import { Tooltip, TooltipContent, TooltipProvider, TooltipTrigger } from "@/components/ui/tooltip";
-import { Wind, Thermometer, Eye } from "lucide-react";
+import { Wind, Thermometer, Eye, TrendingUp, TrendingDown, Minus } from "lucide-react";
 
 interface ForecastMatrixProps {
     forecasts: ForecastResult[];
@@ -55,6 +55,19 @@ export function ForecastMatrix({ forecasts, loading, userPrefs }: ForecastMatrix
         return "bg-purple-600 text-white font-bold animate-pulse shadow-lg shadow-purple-500/20";
     };
 
+    const getHistoricalComparison = (current: number, historical?: number) => {
+        if (historical === undefined || historical === 0) return null;
+        const diff = current - historical;
+        const percentDiff = diff / historical;
+
+        // If very small snow amounts, don't overreact
+        if (historical < 2 && Math.abs(diff) < 2) return null;
+
+        if (current > historical * 1.25) return { type: "above", icon: TrendingUp, color: "text-emerald-400", bg: "bg-emerald-400/20", label: "Above Avg" };
+        if (current < historical * 0.75) return { type: "below", icon: TrendingDown, color: "text-amber-400", bg: "bg-amber-400/20", label: "Below Avg" };
+        return { type: "avg", icon: Minus, color: "text-muted-foreground", bg: "bg-muted/10", label: "Average" };
+    };
+
     return (
 
         <div className="overflow-x-auto rounded-xl border border-border bg-card/60 backdrop-blur-sm shadow-2xl">
@@ -98,12 +111,27 @@ export function ForecastMatrix({ forecasts, loading, userPrefs }: ForecastMatrix
                                         <td key={day.date} className="p-1 text-center border-r border-border/50 last:border-0 h-full align-middle">
                                             <Tooltip>
                                                 <TooltipTrigger asChild>
-                                                    <div className={cn(
-                                                        "h-12 w-full flex items-center justify-center rounded-md cursor-help transition-all duration-300 mx-auto",
-                                                        getSnowStyle(day.snowfall_sum)
-                                                    )}>
+                                                    <button
+                                                        type="button"
+                                                        className={cn(
+                                                            "h-12 w-full flex items-center justify-center rounded-md cursor-help transition-all duration-300 mx-auto relative overflow-hidden border-0 p-0 focus:outline-none focus:ring-2 focus:ring-primary/50",
+                                                            getSnowStyle(day.snowfall_sum)
+                                                        )}
+                                                    >
                                                         {day.snowfall_sum > 0 ? day.snowfall_sum.toFixed(0) : <span className="text-muted-foreground/50">-</span>}
-                                                    </div>
+
+                                                        {/* Comparison Indicator Dot */}
+                                                        {(() => {
+                                                            const comp = getHistoricalComparison(day.snowfall_sum, day.historical_snowfall);
+                                                            if (!comp || comp.type === 'avg') return null;
+                                                            return (
+                                                                <div className={cn(
+                                                                    "absolute top-0.5 right-0.5 w-1.5 h-1.5 rounded-full ring-1 ring-black/20",
+                                                                    comp.type === 'above' ? "bg-emerald-300" : "bg-amber-300"
+                                                                )} />
+                                                            );
+                                                        })()}
+                                                    </button>
                                                 </TooltipTrigger>
                                                 <TooltipContent collisionPadding={10} className="text-xs p-3 bg-popover border-border text-popover-foreground shadow-xl">
                                                     <div className="font-bold mb-2 text-primary">{new Date(day.date).toLocaleDateString('en-GB')}</div>
@@ -121,6 +149,24 @@ export function ForecastMatrix({ forecasts, loading, userPrefs }: ForecastMatrix
                                                             {(day.visibility_min / 1000).toFixed(1)} km
                                                         </div>
                                                     </div>
+                                                    {day.historical_snowfall !== undefined && (
+                                                        <div className="pt-2 mt-2 border-t border-border/50">
+                                                            <div className="flex items-center justify-between text-[10px] text-muted-foreground mb-1">
+                                                                <span>Historical Avg</span>
+                                                                <span>{day.historical_snowfall.toFixed(1)}cm</span>
+                                                            </div>
+                                                            {(() => {
+                                                                const comp = getHistoricalComparison(day.snowfall_sum, day.historical_snowfall);
+                                                                if (!comp) return null;
+                                                                return (
+                                                                    <div className={cn("flex items-center gap-1.5 font-medium", comp.color)}>
+                                                                        <comp.icon className="w-3 h-3" />
+                                                                        {comp.label}
+                                                                    </div>
+                                                                );
+                                                            })()}
+                                                        </div>
+                                                    )}
                                                 </TooltipContent>
                                             </Tooltip>
                                         </td>
@@ -131,7 +177,7 @@ export function ForecastMatrix({ forecasts, loading, userPrefs }: ForecastMatrix
                     </tbody>
                 </table>
             </TooltipProvider>
-        </div>
+        </div >
         // </TooltipProvider>
     );
 }

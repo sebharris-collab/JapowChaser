@@ -62,6 +62,12 @@ export function ResortCombobox({ onSelect, filterRegion }: ComboboxProps) {
                                             onSelect(resort.id);
                                             setOpen(false)
                                         }}
+                                        // Mobile/Touch fix: CommandItem sometimes swallows clicks if focus logic fights
+                                        onPointerUp={() => {
+                                            setValue(resort.id);
+                                            onSelect(resort.id);
+                                            setOpen(false)
+                                        }}
                                     >
                                         <Check
                                             className={cn(
