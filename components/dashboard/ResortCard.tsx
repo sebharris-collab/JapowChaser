@@ -3,10 +3,11 @@
 import { useState } from "react";
 import { Card, CardContent, CardHeader, CardTitle, CardDescription } from "@/components/ui/card";
 import { Badge } from "@/components/ui/badge";
+import { Button } from "@/components/ui/button";
 import { WeatherData } from "@/lib/weather";
 import { calculatePowderScore, cn } from "@/lib/utils";
 import { Bar, BarChart, ResponsiveContainer, Tooltip as RechartsTooltip } from "recharts";
-import { Wind, Eye, ChevronDown, ChevronUp } from "lucide-react";
+import { Wind, Eye, ChevronDown, ChevronUp, Camera, ExternalLink } from "lucide-react";
 
 interface ResortCardProps {
     name: string;
@@ -16,10 +17,12 @@ interface ResortCardProps {
     tags?: string[];
     loading?: boolean;
     percentile?: number; // Kept for compat if needed, but we prefer rank
+    webcamUrl?: string;
 }
 
-export function ResortCard({ name, region, data, rank, tags = [], loading }: ResortCardProps) {
+export function ResortCard({ name, region, data, rank, tags = [], loading, webcamUrl }: ResortCardProps) {
     const [isExpanded, setIsExpanded] = useState(false);
+    const [isWebcamOpen, setIsWebcamOpen] = useState(false);
 
     if (loading) {
         return (
@@ -156,6 +159,50 @@ export function ResortCard({ name, region, data, rank, tags = [], loading }: Res
                             );
                         })}
                     </div>
+
+                    {/* Webcam Section */}
+                    {webcamUrl && (
+                        <div className="mt-6 pt-4 border-t border-border/50">
+                            <Button
+                                variant="outline"
+                                size="sm"
+                                className="w-full gap-2"
+                                onClick={(e) => {
+                                    e.stopPropagation();
+                                    setIsWebcamOpen(!isWebcamOpen);
+                                }}
+                            >
+                                <Camera className="w-4 h-4" />
+                                {isWebcamOpen ? "Hide Webcam" : "View Webcam"}
+                            </Button>
+
+                            {isWebcamOpen && (
+                                <div className="mt-4 animate-in fade-in slide-in-from-top-2 duration-300">
+                                    <div className="aspect-video w-full rounded-md border border-border bg-muted relative overflow-hidden">
+                                        <iframe
+                                            src={webcamUrl}
+                                            className="w-full h-full"
+                                            loading="lazy"
+                                            referrerPolicy="no-referrer"
+                                        />
+                                        <div className="absolute bottom-2 right-2">
+                                            <Button
+                                                variant="secondary"
+                                                size="sm"
+                                                className="h-7 text-xs gap-1.5 shadow-lg bg-background/80 backdrop-blur hover:bg-background"
+                                                onClick={(e) => {
+                                                    e.stopPropagation();
+                                                    window.open(webcamUrl, '_blank');
+                                                }}
+                                            >
+                                                Open External <ExternalLink className="w-3 h-3" />
+                                            </Button>
+                                        </div>
+                                    </div>
+                                </div>
+                            )}
+                        </div>
+                    )}
                 </CardContent>
             )}
         </Card>

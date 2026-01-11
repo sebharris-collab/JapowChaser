@@ -104,6 +104,7 @@ export function DashboardGrid({ forecasts, loading, userPrefs }: DashboardGridPr
                             data={forecast.daily}
                             rank={scoreData.rank}
                             tags={scoreData.tags}
+                            webcamUrl={resort.webcamUrl}
                         />
                     </div>
                 );
