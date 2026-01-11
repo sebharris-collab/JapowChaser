@@ -22,7 +22,6 @@ interface ResortCardProps {
 
 export function ResortCard({ name, region, data, rank, tags = [], loading, webcamUrl }: ResortCardProps) {
     const [isExpanded, setIsExpanded] = useState(false);
-    const [isWebcamOpen, setIsWebcamOpen] = useState(false);
 
     if (loading) {
         return (
@@ -160,47 +159,22 @@ export function ResortCard({ name, region, data, rank, tags = [], loading, webca
                         })}
                     </div>
 
-                    {/* Webcam Section */}
+                    {/* Webcam Section - Simplified Redirect */}
                     {webcamUrl && (
                         <div className="mt-6 pt-4 border-t border-border/50">
                             <Button
                                 variant="outline"
                                 size="sm"
-                                className="w-full gap-2"
+                                className="w-full gap-2 transition-all duration-200 hover:border-primary/50 hover:text-primary hover:bg-primary/5"
                                 onClick={(e) => {
                                     e.stopPropagation();
-                                    setIsWebcamOpen(!isWebcamOpen);
+                                    window.open(webcamUrl, '_blank');
                                 }}
                             >
                                 <Camera className="w-4 h-4" />
-                                {isWebcamOpen ? "Hide Webcam" : "View Webcam"}
+                                View Webcam
+                                <ExternalLink className="w-3 h-3 ml-auto opacity-50" />
                             </Button>
-
-                            {isWebcamOpen && (
-                                <div className="mt-4 animate-in fade-in slide-in-from-top-2 duration-300">
-                                    <div className="aspect-video w-full rounded-md border border-border bg-muted relative overflow-hidden">
-                                        <iframe
-                                            src={webcamUrl}
-                                            className="w-full h-full"
-                                            loading="lazy"
-                                            referrerPolicy="no-referrer"
-                                        />
-                                        <div className="absolute bottom-2 right-2">
-                                            <Button
-                                                variant="secondary"
-                                                size="sm"
-                                                className="h-7 text-xs gap-1.5 shadow-lg bg-background/80 backdrop-blur hover:bg-background"
-                                                onClick={(e) => {
-                                                    e.stopPropagation();
-                                                    window.open(webcamUrl, '_blank');
-                                                }}
-                                            >
-                                                Open External <ExternalLink className="w-3 h-3" />
-                                            </Button>
-                                        </div>
-                                    </div>
-                                </div>
-                            )}
                         </div>
                     )}
                 </CardContent>

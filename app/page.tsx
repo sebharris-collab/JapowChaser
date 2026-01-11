@@ -138,6 +138,7 @@ export default function Home() {
                 onRegionChange={setSelectedRegion}
                 userPrefs={userPrefs}
                 onPrefsChange={setUserPrefs}
+                selectedResorts={selectedResorts}
             />
 
             <main className="flex-1 container py-6">

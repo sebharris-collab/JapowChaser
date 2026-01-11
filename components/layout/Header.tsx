@@ -23,6 +23,7 @@ interface HeaderProps {
     onRegionChange: (region: string) => void;
     userPrefs: UserPreferences;
     onPrefsChange: (prefs: UserPreferences) => void;
+    selectedResorts: string[];
 }
 
 export function Header({
@@ -36,7 +37,8 @@ export function Header({
     selectedRegion,
     onRegionChange,
     userPrefs,
-    onPrefsChange
+    onPrefsChange,
+    selectedResorts
 }: HeaderProps) {
     const [theme, setTheme] = useState<"dark" | "light">("dark");
 
@@ -149,7 +151,7 @@ export function Header({
                     <div className="h-6 w-px bg-border mx-2 hidden sm:block" />
 
                     {/* Resort Search */}
-                    <ResortCombobox onSelect={onAddResort} filterRegion={selectedRegion} />
+                    <ResortCombobox onSelect={onAddResort} filterRegion={selectedRegion} selectedResorts={selectedResorts} />
 
                     <div className="h-6 w-px bg-border mx-2 hidden sm:block" />
 

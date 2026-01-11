@@ -8,15 +8,41 @@ export type Resort = {
 };
 
 export const JAPANESE_RESORTS: Resort[] = [
-    // Hokkaido Resorts
+    // Hokkaido Resorts (Niseko Split)
     {
-        id: "niseko",
-        name: "Niseko United",
+        id: "grand-hirafu",
+        name: "Niseko Grand Hirafu",
         region: "Hokkaido",
-        lat: 42.8048,
-        lon: 140.6874,
-        webcamUrl: "https://www.niseko.ne.jp/en/niseko-webcams/",
+        lat: 42.8622,
+        lon: 140.7027,
+        webcamUrl: "https://www.youtube.com/watch?v=S016YwQaUyw", // Live camera
     },
+    {
+        id: "hanazono",
+        name: "Niseko Hanazono",
+        region: "Hokkaido",
+        lat: 42.8724,
+        lon: 140.7188,
+        webcamUrl: "https://www.youtube.com/watch?v=CqS3vj9YjkU", // Hanazono Live
+    },
+    {
+        id: "niseko-village",
+        name: "Niseko Village",
+        region: "Hokkaido",
+        lat: 42.8465,
+        lon: 140.6784,
+        webcamUrl: "https://www.niseko-village.com/en/webcam/", // Embeddable page or fallback
+    },
+    {
+        id: "annupuri",
+        name: "Niseko Annupuri",
+        region: "Hokkaido",
+        lat: 42.8358,
+        lon: 140.6583,
+        webcamUrl: "https://annupurilodge.com/webcam/",
+    },
+
+    // Other Hokkaido
     {
         id: "rusutsu",
         name: "Rusutsu Resort",
@@ -82,15 +108,57 @@ export const JAPANESE_RESORTS: Resort[] = [
         webcamUrl: "https://asahidake.hokkaido.jp/en/live-camera/",
     },
 
-    // Nagano Resorts
+    // Hakuba Resorts (Split)
     {
-        id: "hakuba",
-        name: "Hakuba Valley",
+        id: "happo-one",
+        name: "Hakuba Happo-one",
         region: "Nagano",
         lat: 36.7022,
         lon: 137.8524,
-        webcamUrl: "https://www.hakuba.com/webcams",
+        webcamUrl: "https://www.happo-one.jp/en/gelande/livecamera/",
     },
+    {
+        id: "hakuba-47",
+        name: "Hakuba 47",
+        region: "Nagano",
+        lat: 36.6833,
+        lon: 137.8333,
+        webcamUrl: "https://www.hakuba47.co.jp/winter/en/live-camera/",
+    },
+    {
+        id: "goryu",
+        name: "Hakuba Goryu",
+        region: "Nagano",
+        lat: 36.6713,
+        lon: 137.8428,
+        webcamUrl: "https://www.hakubagoryu.com/en/live-camera/",
+    },
+    {
+        id: "iwatake",
+        name: "Hakuba Iwatake",
+        region: "Nagano",
+        lat: 36.7139,
+        lon: 137.8639,
+        webcamUrl: "https://iwatake-mountain-resort.com/livecamera",
+    },
+    {
+        id: "tsugaike",
+        name: "Tsugaike Kogen",
+        region: "Nagano",
+        lat: 36.7570,
+        lon: 137.8839,
+        webcamUrl: "https://www.tsugaike.gr.jp/livecamera",
+    },
+    {
+        id: "cortina",
+        name: "Hakuba Cortina",
+        region: "Nagano",
+        lat: 36.7876,
+        lon: 137.8884,
+        webcamUrl: "https://www.hgp.co.jp/cortina/ski/livecamera/",
+    },
+
+    // Other Nagano
     {
         id: "nozawa",
         name: "Nozawa Onsen",
@@ -122,14 +190,6 @@ export const JAPANESE_RESORTS: Resort[] = [
         lat: 36.7667,
         lon: 138.2833,
         webcamUrl: "https://www.tangram.jp/eng/lift/",
-    },
-    {
-        id: "志賀高原",
-        name: "志賀高原 (Shiga Highlands)",
-        region: "Nagano",
-        lat: 36.7444,
-        lon: 138.5167,
-        webcamUrl: "https://www.shigakogen.gr.jp/english/livecam.html",
     },
 
     // Niigata Resorts
@@ -216,7 +276,7 @@ export const JAPANESE_RESORTS: Resort[] = [
         region: "Iwate",
         lat: 39.9500,
         lon: 140.9500,
-        webcamUrl: "https://www.appi.co.jp/snow-mountain-resort/livecamera/",
+        webcamUrl: "https://www.youtube.com/watch?v=live_stream_id_placeholder", // Often has live streams, need to check if persistent
     },
     {
         id: "geto-kogen",

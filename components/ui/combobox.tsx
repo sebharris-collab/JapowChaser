@@ -21,16 +21,27 @@ import {
 import { JAPANESE_RESORTS } from "@/lib/constants"
 
 interface ComboboxProps {
-    onSelect: (resortId: string) => void;
-    filterRegion?: string;
+    onSelect: (resortId: string) => void
+    filterRegion?: string
+    selectedResorts: string[]
 }
 
-export function ResortCombobox({ onSelect, filterRegion }: ComboboxProps) {
+export function ResortCombobox({ onSelect, filterRegion, selectedResorts }: ComboboxProps) {
     const [open, setOpen] = React.useState(false)
-    const [value, setValue] = React.useState("")
+
+    const [query, setQuery] = React.useState("")
+
+    const filteredResorts = JAPANESE_RESORTS.filter(r => {
+        if (filterRegion && filterRegion !== "ALL" && r.region !== filterRegion) {
+            return false
+        }
+
+        return r.name.toLowerCase().includes(query.toLowerCase())
+    })
+
 
     return (
-        <Popover open={open} onOpenChange={setOpen}>
+        <Popover open={open} onOpenChange={setOpen} modal={false}>
             <PopoverTrigger asChild>
                 <Button
                     variant="outline"
@@ -38,46 +49,50 @@ export function ResortCombobox({ onSelect, filterRegion }: ComboboxProps) {
                     aria-expanded={open}
                     className="w-[200px] justify-between text-foreground"
                 >
-                    {value
-                        ? JAPANESE_RESORTS.find((resort) => resort.id === value)?.name
-                        : "Add Resort..."}
+                    Add Resort...
                     <ChevronsUpDown className="ml-2 h-4 w-4 shrink-0 opacity-50" />
                 </Button>
             </PopoverTrigger>
-            <PopoverContent className="w-[200px] p-0" collisionPadding={10}>
-                <Command>
-                    <CommandInput placeholder="Search resort..." />
+
+            <PopoverContent className="w-[200px] p-0" collisionPadding={10} >
+                <Command shouldFilter={false}>
+                    <CommandInput
+
+                        placeholder="Search resort..."
+                        value={query}
+                        onValueChange={setQuery}
+                    />
+
                     <CommandList>
-                        <CommandEmpty>No resort found.</CommandEmpty>
+                        {filteredResorts.length === 0 && (
+                            <CommandEmpty>No resort found.</CommandEmpty>
+                        )}
+
                         <CommandGroup>
-                            {JAPANESE_RESORTS
-                                .filter(r => !filterRegion || filterRegion === "ALL" || r.region === filterRegion)
-                                .map((resort) => (
-                                    <CommandItem
+                            {filteredResorts.map((resort) => {
+                                const isSelected = selectedResorts.includes(resort.id)
+
+                                return (
+                                    <div
                                         key={resort.id}
-                                        value={resort.name}
-                                        className="cursor-pointer"
-                                        onSelect={() => {
-                                            setValue(resort.id);
-                                            onSelect(resort.id);
-                                            setOpen(false)
-                                        }}
-                                        // Mobile/Touch fix: CommandItem sometimes swallows clicks if focus logic fights
-                                        onPointerUp={() => {
-                                            setValue(resort.id);
-                                            onSelect(resort.id);
-                                            setOpen(false)
-                                        }}
+                                        role="option"
+                                        className={cn(
+                                            "relative flex cursor-pointer select-none items-center rounded-sm px-2 py-1.5 text-sm outline-none",
+                                            "hover:bg-accent hover:text-accent-foreground"
+                                        )}
+                                        onClick={() => onSelect(resort.id)}
                                     >
-                                        <Check
-                                            className={cn(
-                                                "mr-2 h-4 w-4",
-                                                value === resort.id ? "opacity-100" : "opacity-0"
+                                        {/* Checkmark slot */}
+                                        <span className="mr-2 h-4 w-4 flex items-center justify-center">
+                                            {isSelected && (
+                                                <Check className="h-4 w-4 text-primary" />
                                             )}
-                                        />
+                                        </span>
+
                                         {resort.name}
-                                    </CommandItem>
-                                ))}
+                                    </div>
+                                )
+                            })}
                         </CommandGroup>
                     </CommandList>
                 </Command>
