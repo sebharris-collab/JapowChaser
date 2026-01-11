@@ -96,8 +96,12 @@ export default function Home() {
     // Handlers
     const handleAddResort = (resortId: string) => {
         setSelectedResorts(prev => {
-            if (prev.includes(resortId)) return prev;
-            const updated = [...prev, resortId];
+            let updated;
+            if (prev.includes(resortId)) {
+                updated = prev.filter(id => id !== resortId);
+            } else {
+                updated = [...prev, resortId];
+            }
             localStorage.setItem("japow_resorts", JSON.stringify(updated));
             return updated;
         });

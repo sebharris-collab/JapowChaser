@@ -61,7 +61,8 @@ async function fetchHistoricalAverage(
     endDate: string
 ): Promise<Record<string, number>> {
     try {
-        const years = [2022, 2023, 2024]; // Last 3 years
+        const currentYear = new Date().getFullYear();
+        const years = Array.from({ length: 10 }, (_, i) => currentYear - 1 - i); // Last 10 years
         // We need to map requested dates (e.g. 2025-01-10) to historical dates (2024-01-10)
         // Limitation: leap years might shift things by a day, but for snowfall trends it's acceptable.
 
