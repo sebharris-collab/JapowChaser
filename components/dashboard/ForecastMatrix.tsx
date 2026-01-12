@@ -117,6 +117,10 @@ export function ForecastMatrix({ forecasts, loading, userPrefs }: ForecastMatrix
                                                             "h-12 w-full flex items-center justify-center rounded-md cursor-help transition-all duration-300 mx-auto relative overflow-hidden border-0 p-0 focus:outline-none focus:ring-2 focus:ring-primary/50",
                                                             getSnowStyle(day.snowfall_sum)
                                                         )}
+                                                        onClick={(e) => {
+                                                            // On mobile, this helps trigger the tooltip
+                                                            e.currentTarget.focus();
+                                                        }}
                                                     >
                                                         {day.snowfall_sum > 0 ? day.snowfall_sum.toFixed(0) : <span className="text-muted-foreground/50">-</span>}
 

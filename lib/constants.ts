@@ -23,7 +23,7 @@ export const JAPANESE_RESORTS: Resort[] = [
         region: "Hokkaido",
         lat: 42.8724,
         lon: 140.7188,
-        webcamUrl: "https://www.youtube.com/watch?v=CqS3vj9YjkU", // Hanazono Live
+        webcamUrl: "https://hanazononiseko.com/en/winter/resort/live-camera", // Hanazono Live
     },
     {
         id: "niseko-village",
@@ -49,7 +49,7 @@ export const JAPANESE_RESORTS: Resort[] = [
         region: "Hokkaido",
         lat: 42.7495,
         lon: 140.9022,
-        webcamUrl: "https://rusutsu.com/en/live-cameras/",
+        webcamUrl: "https://rusutsu.com/en/live-mountain-cams/",
     },
     {
         id: "furano",
