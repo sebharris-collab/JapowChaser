@@ -3,6 +3,7 @@ export type WeatherData = {
     snowfall_sum: number;
     precipitation_probability_max: number;
     wind_speed_10m_max: number;
+    wind_gusts_10m_max: number;
     visibility_min: number; // In meters
     temperature_2m_max: number;
     temperature_2m_min: number;
@@ -21,8 +22,7 @@ export async function fetchForecast(lat: number, lon: number, startDate: string,
         /** * FIX: We request the JMA model for Japanese accuracy, 
          * and the standard 'best_match' (default) for long-range reliability.
          */
-        const url = `https://api.open-meteo.com/v1/forecast?latitude=${lat}&longitude=${lon}&daily=snowfall_sum,precipitation_probability_max,wind_speed_10m_max,visibility_min,temperature_2m_max,temperature_2m_min&timezone=${timezone}&start_date=${startDate}&end_date=${endDate}&models=jma_msm,best_match`;
-
+        const url = `https://api.open-meteo.com/v1/forecast?latitude=${lat}&longitude=${lon}&daily=snowfall_sum,precipitation_probability_max,wind_speed_10m_max,wind_gusts_10m_max,visibility_min,temperature_2m_max,temperature_2m_min&timezone=${timezone}&start_date=${startDate}&end_date=${endDate}&models=jma_msm,best_match`;
         const res = await fetch(url);
         const data = await res.json();
         const d = data.daily;
@@ -36,6 +36,7 @@ export async function fetchForecast(lat: number, lon: number, startDate: string,
             const maxTemp = d.temperature_2m_max_jma_msm?.[i] ?? d.temperature_2m_max_best_match?.[i] ?? 0;
             const minTemp = d.temperature_2m_min_jma_msm?.[i] ?? d.temperature_2m_min_best_match?.[i] ?? 0;
             const wind = d.wind_speed_10m_max_jma_msm?.[i] ?? d.wind_speed_10m_max_best_match?.[i] ?? 0;
+            const wind_gust = d.wind_gusts_10m_max_jma_msm?.[i] ?? d.wind_gusts_10m_max_best_match?.[i] ?? 0;
             
             // Probability usually only exists in the global 'best_match'
             const prob = d.precipitation_probability_max_best_match?.[i] ?? d.precipitation_probability_max?.[i] ?? 0;
@@ -45,6 +46,7 @@ export async function fetchForecast(lat: number, lon: number, startDate: string,
                 snowfall_sum: Number(snowfall),
                 precipitation_probability_max: Math.round(Number(prob)),
                 wind_speed_10m_max: Number(wind),
+                wind_gusts_10m_max: Number(wind_gust),
                 visibility_min: d.visibility_min_best_match?.[i] ?? 10000,
                 temperature_2m_max: Math.round(Number(maxTemp)),
                 temperature_2m_min: Math.round(Number(minTemp)),

@@ -133,6 +133,7 @@ export function ResortCard({ name, region, data, rank, tags = [], loading, webca
                         {forecastData.map((day) => {
                             const isBluebird = day.precipitation_probability_max < 20 && day.visibility_min > 5000;
                             const isPowder = day.snowfall_sum > 10;
+                            const isWindRisk = day.wind_speed_10m_max >= 50 || day.wind_gusts_10m_max >= 55;
 
                             return (
                                 <div key={day.date} className="group/row grid grid-cols-12 gap-2 items-center text-sm py-2 px-2 rounded-md hover:bg-muted/50 transition-colors">
@@ -149,6 +150,7 @@ export function ResortCard({ name, region, data, rank, tags = [], loading, webca
                                         <div className="flex justify-end items-center gap-2">
                                             {isPowder && <Badge variant="default" className="bg-primary/20 text-primary border-primary/20 hover:bg-primary/30 h-5 px-1.5 text-[9px] uppercase tracking-wider font-semibold border-0">Powder</Badge>}
                                             {isBluebird && !isPowder && <Badge variant="secondary" className="bg-sky-500/20 text-sky-600 dark:text-sky-300 border-sky-500/20 h-5 px-1.5 text-[9px] uppercase tracking-wider font-semibold border-0">Sun</Badge>}
+                                            {isWindRisk && (<Badge variant="outline" className="bg-orange-500/20 text-orange-700 dark:text-orange-300 border-orange-500/30 h-5 px-1.5 text-[9px] uppercase tracking-wider font-semibold animate-pulse">Wind</Badge>)}
                                         </div>
                                         <div className="flex items-center gap-1 text-[10px] text-muted-foreground">
                                             <Wind className="w-3 h-3" /> {day.wind_speed_10m_max.toFixed(0)}
