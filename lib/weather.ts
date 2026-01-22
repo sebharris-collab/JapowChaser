@@ -14,42 +14,45 @@ export type ForecastResult = {
     daily: WeatherData[];
 };
 
-export async function fetchForecast(
-    lat: number,
-    lon: number,
-    startDate: string, // YYYY-MM-DD
-    endDate: string // YYYY-MM-DD
-): Promise<WeatherData[]> {
+export async function fetchForecast(lat: number, lon: number, startDate: string, endDate: string) {
     try {
         const timezone = "Asia/Tokyo";
-        const url = `https://api.open-meteo.com/v1/forecast?latitude=${lat}&longitude=${lon}&daily=snowfall_sum,precipitation_probability_max,wind_speed_10m_max,visibility_min,temperature_2m_max,temperature_2m_min&timezone=${timezone}&start_date=${startDate}&end_date=${endDate}`;
+        
+        /** * FIX: We request the JMA model for Japanese accuracy, 
+         * and the standard 'best_match' (default) for long-range reliability.
+         */
+        const url = `https://api.open-meteo.com/v1/forecast?latitude=${lat}&longitude=${lon}&daily=snowfall_sum,precipitation_probability_max,wind_speed_10m_max,visibility_min,temperature_2m_max,temperature_2m_min&timezone=${timezone}&start_date=${startDate}&end_date=${endDate}&models=jma_msm,best_match`;
 
         const res = await fetch(url);
-        if (!res.ok) {
-            throw new Error("Failed to fetch weather data");
-        }
         const data = await res.json();
+        const d = data.daily;
+        if (!d) return [];
 
-
-        const daily = data.daily;
-
-        // Fetch historical data in parallel
         const historicalAverages = await fetchHistoricalAverage(lat, lon, startDate, endDate);
 
-        const result: WeatherData[] = daily.time.map((date: string, i: number) => ({
-            date,
-            snowfall_sum: daily.snowfall_sum[i],
-            precipitation_probability_max: daily.precipitation_probability_max[i],
-            wind_speed_10m_max: daily.wind_speed_10m_max[i],
-            visibility_min: daily.visibility_min ? daily.visibility_min[i] : 10000, // Default to good visibility if null
-            temperature_2m_max: daily.temperature_2m_max[i],
-            temperature_2m_min: daily.temperature_2m_min[i],
-            historical_snowfall: historicalAverages[date] || 0,
-        }));
+        return d.time.map((date: string, i: number) => {
+            // Check JMA MSM first, then fallback to the 'best_match' (default) array
+            const snowfall = d.snowfall_sum_jma_msm?.[i] ?? d.snowfall_sum_best_match?.[i] ?? 0;
+            const maxTemp = d.temperature_2m_max_jma_msm?.[i] ?? d.temperature_2m_max_best_match?.[i] ?? 0;
+            const minTemp = d.temperature_2m_min_jma_msm?.[i] ?? d.temperature_2m_min_best_match?.[i] ?? 0;
+            const wind = d.wind_speed_10m_max_jma_msm?.[i] ?? d.wind_speed_10m_max_best_match?.[i] ?? 0;
+            
+            // Probability usually only exists in the global 'best_match'
+            const prob = d.precipitation_probability_max_best_match?.[i] ?? d.precipitation_probability_max?.[i] ?? 0;
 
-        return result;
+            return {
+                date,
+                snowfall_sum: Number(snowfall),
+                precipitation_probability_max: Math.round(Number(prob)),
+                wind_speed_10m_max: Number(wind),
+                visibility_min: d.visibility_min_best_match?.[i] ?? 10000,
+                temperature_2m_max: Math.round(Number(maxTemp)),
+                temperature_2m_min: Math.round(Number(minTemp)),
+                historical_snowfall: historicalAverages[date] || 0,
+            };
+        });
     } catch (error) {
-        console.error("Error fetching forecast:", error);
+        console.error("Fetch error:", error);
         return [];
     }
 }
@@ -61,68 +64,65 @@ async function fetchHistoricalAverage(
     endDate: string
 ): Promise<Record<string, number>> {
     try {
-        const currentYear = new Date().getFullYear();
-        const years = Array.from({ length: 10 }, (_, i) => currentYear - 1 - i); // Last 10 years
-        // We need to map requested dates (e.g. 2025-01-10) to historical dates (2024-01-10)
-        // Limitation: leap years might shift things by a day, but for snowfall trends it's acceptable.
+        const start = new Date(startDate);
+        const end = new Date(endDate);
+        
+        // Define the decade range
+        const startYear = start.getFullYear() - 10;
+        const endYear = end.getFullYear() - 1;
 
-        // Helper to adjust year
-        const adjustYear = (dateStr: string, year: number) => {
-            const d = new Date(dateStr);
-            d.setFullYear(year);
-            return d.toISOString().split('T')[0];
-        };
+        // Construct the strings for the API
+        const histStart = `${startYear}-${String(start.getMonth() + 1).padStart(2, '0')}-${String(start.getDate()).padStart(2, '0')}`;
+        const histEnd = `${endYear}-${String(end.getMonth() + 1).padStart(2, '0')}-${String(end.getDate()).padStart(2, '0')}`;
 
-        const startDates = years.map(y => adjustYear(startDate, y));
-        const endDates = years.map(y => adjustYear(endDate, y));
+        // We explicitly add &models=era5 (the most accurate historical model for Japan)
+        const url = `https://archive-api.open-meteo.com/v1/archive?latitude=${lat}&longitude=${lon}&start_date=${histStart}&end_date=${histEnd}&daily=snowfall_sum&timezone=Asia/Tokyo&models=era5`;
 
-        // Fetch parallel
-        const promises = years.map(async (year, idx) => {
-            const s = startDates[idx];
-            const e = endDates[idx];
-            const url = `https://archive-api.open-meteo.com/v1/archive?latitude=${lat}&longitude=${lon}&start_date=${s}&end_date=${e}&daily=snowfall_sum&timezone=Asia/Tokyo`;
-            const res = await fetch(url);
-            if (!res.ok) return null;
-            return await res.json();
+        const res = await fetch(url);
+        if (!res.ok) return {};
+        const data = await res.json();
+
+        const dailyData = data.daily;
+        if (!dailyData || !dailyData.time) return {};
+        
+        const statsMap: Record<string, { total: number, count: number }> = {};
+
+        dailyData.time.forEach((dateStr: string, idx: number) => {
+            // Using substring(5) to get "MM-DD"
+            const mmDd = dateStr.substring(5); 
+            const snowfall = dailyData.snowfall_sum[idx] || 0;
+
+            if (!statsMap[mmDd]) {
+                statsMap[mmDd] = { total: 0, count: 0 };
+            }
+            statsMap[mmDd].total += snowfall;
+            statsMap[mmDd].count += 1;
         });
 
-        const results = await Promise.all(promises);
-
-        // Aggregation: Map keys are NOT the historical dates, but the "MM-DD" part to match current year
-        // Actually, simpler: map by index since all requests are clearly bounded by start/end with same duration
-        // Assuming the API returns the same number of days for each request.
-
         const averages: Record<string, number> = {};
-
-        // We need to know the target dates to map back to
-        const targetStart = new Date(startDate);
-        const targetEnd = new Date(endDate);
-        const daysDiff = Math.floor((targetEnd.getTime() - targetStart.getTime()) / (1000 * 3600 * 24)) + 1;
-
-        for (let i = 0; i < daysDiff; i++) {
-            let sum = 0;
-            let count = 0;
-
-            results.forEach(r => {
-                if (r && r.daily && r.daily.snowfall_sum && r.daily.snowfall_sum[i] !== undefined) {
-                    sum += r.daily.snowfall_sum[i] || 0;
-                    count++;
-                }
-            });
-
-            const avg = count > 0 ? sum / count : 0;
-
-            // reconstruct the target date key
-            const d = new Date(targetStart);
-            d.setDate(d.getDate() + i);
-            const key = d.toISOString().split('T')[0];
-            averages[key] = avg;
+        let tempDate = new Date(start);
+        
+        // Use a loop that respects actual date objects to reconstruct the return map
+        while (tempDate <= end) {
+            // Reconstruct key: YYYY-MM-DD
+            const year = tempDate.getFullYear();
+            const month = String(tempDate.getMonth() + 1).padStart(2, '0');
+            const day = String(tempDate.getDate()).padStart(2, '0');
+            const dateKey = `${year}-${month}-${day}`;
+            
+            const mmDd = `${month}-${day}`;
+            const stats = statsMap[mmDd];
+            
+            // Calculate average and round to 1 decimal place
+            const avg = stats && stats.count > 0 ? stats.total / stats.count : 0;
+            averages[dateKey] = Number(avg.toFixed(1));
+            
+            tempDate.setDate(tempDate.getDate() + 1);
         }
 
         return averages;
-
     } catch (e) {
-        console.error("Historical fetch failed", e);
+        console.error("Historical fetch failed:", e);
         return {};
     }
 }
