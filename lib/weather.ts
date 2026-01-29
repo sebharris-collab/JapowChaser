@@ -20,9 +20,9 @@ export async function fetchForecast(lat: number, lon: number, startDate: string,
         const timezone = "Asia/Tokyo";
         
         /** * FIX: We request the JMA model for Japanese accuracy, 
-         * and the standard 'best_match' (default) for long-range reliability.
+         * and the standard 'ecmwf_ifs' (default) for long-range reliability.
          */
-        const url = `https://api.open-meteo.com/v1/forecast?latitude=${lat}&longitude=${lon}&daily=snowfall_sum,precipitation_probability_max,wind_speed_10m_max,wind_gusts_10m_max,visibility_min,temperature_2m_max,temperature_2m_min&timezone=${timezone}&start_date=${startDate}&end_date=${endDate}&models=jma_msm,best_match`;
+        const url = `https://api.open-meteo.com/v1/forecast?latitude=${lat}&longitude=${lon}&daily=snowfall_sum,precipitation_probability_max,wind_speed_10m_max,wind_gusts_10m_max,visibility_min,temperature_2m_max,temperature_2m_min&timezone=${timezone}&start_date=${startDate}&end_date=${endDate}&models=jma_msm,ecmwf_ifs`;
         const res = await fetch(url);
         const data = await res.json();
         const d = data.daily;
@@ -31,15 +31,15 @@ export async function fetchForecast(lat: number, lon: number, startDate: string,
         const historicalAverages = await fetchHistoricalAverage(lat, lon, startDate, endDate);
 
         return d.time.map((date: string, i: number) => {
-            // Check JMA MSM first, then fallback to the 'best_match' (default) array
-            const snowfall = d.snowfall_sum_jma_msm?.[i] ?? d.snowfall_sum_best_match?.[i] ?? 0;
-            const maxTemp = d.temperature_2m_max_jma_msm?.[i] ?? d.temperature_2m_max_best_match?.[i] ?? 0;
-            const minTemp = d.temperature_2m_min_jma_msm?.[i] ?? d.temperature_2m_min_best_match?.[i] ?? 0;
-            const wind = d.wind_speed_10m_max_jma_msm?.[i] ?? d.wind_speed_10m_max_best_match?.[i] ?? 0;
-            const wind_gust = d.wind_gusts_10m_max_jma_msm?.[i] ?? d.wind_gusts_10m_max_best_match?.[i] ?? 0;
+            // Check JMA MSM first, then fallback to the 'ecmwf_ifs' (default) array
+            const snowfall = d.snowfall_sum_jma_msm?.[i] ?? d.snowfall_sum_ecmwf_ifs?.[i] ?? 0;
+            const maxTemp = d.temperature_2m_max_jma_msm?.[i] ?? d.temperature_2m_max_ecmwf_ifs?.[i] ?? 0;
+            const minTemp = d.temperature_2m_min_jma_msm?.[i] ?? d.temperature_2m_min_ecmwf_ifs?.[i] ?? 0;
+            const wind = d.wind_speed_10m_max_jma_msm?.[i] ?? d.wind_speed_10m_max_ecmwf_ifs?.[i] ?? 0;
+            const wind_gust = d.wind_gusts_10m_max_jma_msm?.[i] ?? d.wind_gusts_10m_max_ecmwf_ifs?.[i] ?? 0;
             
-            // Probability usually only exists in the global 'best_match'
-            const prob = d.precipitation_probability_max_best_match?.[i] ?? d.precipitation_probability_max?.[i] ?? 0;
+            // Probability usually only exists in the global 'ecmwf_ifs'
+            const prob = d.precipitation_probability_max_ecmwf_ifs?.[i] ?? d.precipitation_probability_max?.[i] ?? 0;
 
             return {
                 date,
@@ -47,7 +47,7 @@ export async function fetchForecast(lat: number, lon: number, startDate: string,
                 precipitation_probability_max: Math.round(Number(prob)),
                 wind_speed_10m_max: Number(wind),
                 wind_gusts_10m_max: Number(wind_gust),
-                visibility_min: d.visibility_min_best_match?.[i] ?? 10000,
+                visibility_min: d.visibility_min_ecmwf_ifs?.[i] ?? 10000,
                 temperature_2m_max: Math.round(Number(maxTemp)),
                 temperature_2m_min: Math.round(Number(minTemp)),
                 historical_snowfall: historicalAverages[date] || 0,
