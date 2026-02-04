@@ -107,6 +107,22 @@ export const JAPANESE_RESORTS: Resort[] = [
         lon: 142.8533,
         webcamUrl: "https://asahidake.hokkaido.jp/en/live-camera/",
     },
+    {
+        id: "kurodake",
+        name: "Kurodake",
+        region: "Hokkaido",
+        lat: 43.7085,
+        lon: 142.936694,
+        webcamUrl: "https://www.rinyu.co.jp/kurodake/",
+    },
+    {
+        id: "mt-racey",
+        name: "Mt. Racey",
+        region: "Hokkaido",
+        lat: 43.045389,
+        lon: 141.984361,
+        webcamUrl: "https://www.youtube.com/watch?v=mstAFJcoe8E&embeds_referring_euri=https%3A%2F%2Fyubari-resort.co.jp%2F&source_ve_path=Mjg2NjY",
+    },
 
     // Hakuba Resorts (Split)
     {
